@@ -34,6 +34,12 @@ def it(l0, xx,yy, pipes, dirs):
     return found
 
 def pt1(l0):
+    path = find_path(l0)
+    ans = int(len(path)/2) # the shortest route is just half the path length!!
+    print(ans)
+    return ans
+
+def find_path(l0):
     startx, starty = find_start(l0)
     #print(l0[starty][startx])
 
@@ -62,13 +68,10 @@ def pt1(l0):
         frontier = frontier.union(found)
         frontier = frontier.difference(path)
         path.add((fx,fy))
-        #print(frontier)
     
     print("########")
     print(path)
-    ans = int(len(path)/2) # the shortest route is just half the path length!!
-    print(ans)
-    return ans
+    return path
 
 def test():
     with open("day10_ex.txt") as h0:
@@ -100,8 +103,12 @@ def pt1_main():
 def pt2():
     #with open("day10_pt2_ex0.txt") as h0:
     #with open("day10_pt2_ex1.txt") as h0:
-    with open("day10_pt2_ex2.txt") as h0:
+    #with open("day10_pt2_ex2.txt") as h0:
+    #with open("day10_pt2_ex3.txt") as h0:
+    with open("day10_data.txt") as h0:
         l0 = [list(x.strip()) for x in h0.readlines()]
+
+    path = find_path(l0) # this from part 1 - came in handy!
 
     candi = set()
     for y, row in enumerate(l0):
@@ -109,36 +116,36 @@ def pt2():
         for x, char in enumerate(row):
             if char == ".":
                 candi.add((x,y))
-    print(sorted(sorted(list(candi), key= lambda x: x[1]), key= lambda x: x[0]))
+            elif (x,y) not in path:
+                candi.add((x,y))
+    print(sorted(sorted(list(candi), key= lambda x: x[1]), key= lambda x: x[0])) # sanity check
 
     inside = set()
     for x,y in candi:
         print((x,y))
+
+        # ray casting method - just look either left or right (depending on where S is)
         #look left
-        l_col = l0[y][0:x]
+        #l_col_old = l0[y][0:x] # this doesn't work because it includes non-loop pipes
+        l_col = []
+        for xx in range(0,x):
+            if (xx,y) in path:
+                l_col.append(l0[y][xx])
 
         #look right
-        r_col = l0[y][x+1:len(l0[y])]
-        print(r_col)
-        #look up
-        up_col = []
-        for _yy, row in enumerate(l0[:y+1]):
-            up_col.append(row[x])
-        #look down
-        down_col = []
-        for _yy, row in enumerate(l0[y+1:]):
-            down_col.append(row[x])
-        if (x,y) == (3,2):
-            print("break")
+        #r_col_old = l0[y][x+1:len(l0[y])] # this doesn't work because it includes non-loop pipes
+        r_col = []
+        for xx in range(x+1,len(l0[y])):
+            if (xx,y) in path:
+                r_col.append(l0[y][xx])
 
-        if (("|" in l_col or "F" in l_col or "L" in l_col)
-         and ("|" in r_col or "7" in r_col or "J" in r_col)
-         and ("-" in up_col or "F" in up_col or "7" in up_col)
-         and ("-" in down_col or "L" in down_col or "J" in down_col)):
+        if "S" in r_col: # S can be anything so breaks the 
+            edges = l_col.count("7") + l_col.count("|") + l_col.count("F")
+        else:
+            edges = r_col.count("7") + r_col.count("|") + r_col.count("F")
+        if edges % 2 == 1: # odd means inside, even means outside... maths or sth!
             inside.add((x,y))
-
-    print(inside)
-    print(len(inside))
+        
     for y, row in enumerate(l0):
         for x, char in enumerate(row):
             if (x,y) in inside:
@@ -148,23 +155,9 @@ def pt2():
     for y, row in enumerate(l0):
         print("".join(row))
 
-    dirs={}
-    dirs["N"] = (0,-1)
-    dirs["E"] = (1,0)
-    dirs["S"] = (0,1)
-    dirs["W"] = (-1,0)
-    
-    remove = set()
-    for x,y in inside:
-        for _, vec in dirs.items():
-            nx = x+vec[0]
-            ny = y+vec[1]
-            if l0[ny][nx] == ".":
-                remove.add((x,y))
-    inside -= remove
     print(inside)
     print(len(inside))
 
-#test()
+test()
 #pt1_main()
 pt2()
