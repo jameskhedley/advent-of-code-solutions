@@ -99,45 +99,6 @@ def search(g, f_allow):
             npath.append(nbor)
             hq.heappush(pq, (distance, nbor, ndir, nscount, npath))
 
-def pt1(g):
-    spos = (0,0)
-    visited = set()
-    visited.add((spos, "", 0))
-
-    #score, pos, direction,  step count, path
-    pq = [(0, spos, "", 0, [])]
-
-    while len(pq) > 0:
-        val, pos, curdir, scount, path = hq.heappop(pq)
-        if pos == (2,0):
-            print("break")
-        if pos == (len(g)-1, len(g[0])-1):
-            # reached destination, return result
-            return val, path
-
-        for ndir, nbor in connect4(pos).items():
-            nx, ny = nbor
-            # bounds check
-            if (0 > nx or nx > len(g[0])-1) or (0 > ny or ny > len(g)-1):
-                continue
-
-            # can't reverse
-            if curdir != "" and OPP[curdir] == ndir:
-                continue
-                
-            # calc score and reject duplicate states
-            distance = val + gxy(g, nx, ny)
-            state = (nbor, ndir, nscount)
-            if state in visited:
-                continue
-    
-            # all good, store visited state and push next node
-            visited.add(state)
-
-            npath = path[:] #copy list
-            npath.append(nbor)
-            hq.heappush(pq, (distance, nbor, ndir, nscount, npath))
-
 def connect4(pos):
     x,y = pos
     north = (x,y-1)
