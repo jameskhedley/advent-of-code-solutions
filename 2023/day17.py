@@ -7,15 +7,16 @@ from copy import deepcopy
 def main():
     #with open("day17_ex2.txt") as h0: #16 p1
     #with open("day17_ex.txt") as h0: #102 p1, 94 p2
-    with open("day17_data.txt") as h0:
-    #with open("day17_ex3.txt") as h0: # 71 p2 ???
+    with open("day17_data.txt") as h0:   
+    #for some reason this ex3 set comes out wrong but gets right answer on full data??
+    #with open("day17_ex3.txt") as h0: # 71 p2 ??? 
         l0 = [list(x.strip()) for x in h0.readlines()]
-    #ans, path = pt1(l0)
+    ans, path = search(l0, f_allow_pt1)
     #print(path)
-    #print(ans)
-    ans2, path2 =pt2(l0)
-    print(path2)
-    print(ans2)
+    print("Part 1 answer: %d" % ans)
+    ans2, path2 = search(l0, f_allow_pt2)
+    #print(path2)
+    print("Part 2 answer: %d" % ans2)
     for pos in path2:
         l0[pos[1]][pos[0]] = "*"
     pg(l0)
@@ -30,7 +31,34 @@ def gxy(g, x, y): #sugary
 
 OPP = {"N" :"S", "E":"W", "S":"N", "W":"E"}
 
-def pt2(g):
+def f_allow_pt2(curdir, ndir, scount):
+    nscount = 1
+    # disallow based on turn after 10 rule
+    if curdir == ndir or curdir == '':
+        # same direction as before
+        if scount > 9:
+            return -1
+        else:
+            nscount = scount + 1
+    else:
+        # can we turn yet?
+        if scount < 4:
+            return -1
+        else:
+            nscount = 1
+    return nscount
+
+def f_allow_pt1(curdir, ndir, scount):
+    nscount = 1
+    # disallow based on turn after 3 rule
+    if curdir == ndir or curdir == '':
+        if scount > 2:
+            return -1
+        else:
+            nscount = scount + 1
+    return nscount
+
+def search(g, f_allow):
     spos = (0,0)
     visited = set()
     visited.add((spos, "", 0))
@@ -40,9 +68,6 @@ def pt2(g):
 
     while len(pq) > 0:
         val, pos, curdir, scount, path = hq.heappop(pq)
-        #if pos == (8,2):
-        #if pos == (8,0):
-        #    print("break")
         if pos == (len(g[0])-1, len(g)-1):
             # reached destination, return result
             return val, path
@@ -53,25 +78,14 @@ def pt2(g):
             if (0 > nx or nx > len(g[0])-1) or (0 > ny or ny > len(g)-1):
                 continue
 
-            nscount = 1
-            # disallow based on turn after 10 rule
-            if curdir == ndir or curdir == '':
-                # same direction as before
-                if scount > 9:
-                    continue
-                else:
-                    nscount = scount + 1
-            else:
-                # can we turn yet?
-                if scount < 4:
-                    continue
-                else:
-                    nscount = 1
-                    
             # can't reverse
             if curdir != "" and OPP[curdir] == ndir:
                 continue
                 
+            nscount = f_allow(curdir, ndir, scount)
+            if nscount < 0:
+                continue
+
             # calc score and reject duplicate states
             distance = val + gxy(g, nx, ny)
             state = (nbor, ndir, nscount)
@@ -84,7 +98,6 @@ def pt2(g):
             npath = path[:] #copy list
             npath.append(nbor)
             hq.heappush(pq, (distance, nbor, ndir, nscount, npath))
-    return "oops", "opps"
 
 def pt1(g):
     spos = (0,0)
@@ -108,13 +121,6 @@ def pt1(g):
             if (0 > nx or nx > len(g[0])-1) or (0 > ny or ny > len(g)-1):
                 continue
 
-            nscount = 1
-            # disallow based on turn after 3 rule
-            if curdir == ndir or curdir == '':
-                if scount > 2:
-                    continue
-                else:
-                    nscount = scount + 1
             # can't reverse
             if curdir != "" and OPP[curdir] == ndir:
                 continue
