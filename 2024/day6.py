@@ -1,4 +1,4 @@
-import itertools, copy
+import copy
 debug = 0
 if debug:
     #lines = ''.join(open("./day6_ex.txt").readlines()).split()
