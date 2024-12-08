@@ -1,5 +1,5 @@
 import math, itertools
-debug = 1
+debug = 0
 if debug:
     #lines = ''.join(open("./day7_ex.txt").readlines()).split("\n")
     lines = ''.join(open("./day7_td.txt").readlines()).split("\n")[:30]
@@ -11,33 +11,33 @@ for s0 in lines:
     n, t = [x.strip() for x in s0.split(":")]
     n = int(n)
     t = [int(x) for x in t.split()]
-    #t = [x for x in t.split()]
     data.append([n, t])
-
-def alternator(n):
-    for i in range(n):
-        if i % 2 == 0:
-            yield '*'
-        else:
-            yield '+'
 
 def pt1(data):
     found = []
     #data = [[292, [11, 6, 16, 20]]]
     #data = [[4558, [4, 2, 894, 9, 4, 1, 851, 4, 4, 55]]]
     #data = [[20592, [46, 62, 81, 97, 72]]]
-    data = [[1501, [26, 6, 343, 940, 62]]]
+    #data = [[1501, [26, 6, 343, 940, 62]]]
     lc = 0
     lens = [len(t) for n, t in data]
-    alts = [x for x in alternator(max(lens))]
+
     ml = max(lens)
     seq_cache = [0] * (ml+1)
     for idx, (n,t) in enumerate(data):
         if seq_cache[len(t)] != 0:
             continue
         print("warm up: %d" % len(t))
-        #seq_cache[len(t)] = set(itertools.permutations(alts[:len(t)]))
-        seq_cache[len(t)] = list(itertools.permutations(alts[:len(t)]))
+        base_perms = []
+        all_perms = set()
+        for i in range(len(t)+1):
+            a = ['*']*(len(t)-i) + ['+']*i
+            base_perms.append(a)
+        for bp in base_perms:
+            expand = list(set(itertools.permutations(bp, len(t))))
+            all_perms= all_perms.union(expand)
+
+        seq_cache[len(t)] = all_perms
     
     for n, t in data:
         print(lc)
