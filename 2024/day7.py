@@ -1,8 +1,8 @@
 import math, itertools
 debug = 0
 if debug:
-    #lines = ''.join(open("./day7_ex.txt").readlines()).split("\n")
-    lines = ''.join(open("./day7_td.txt").readlines()).split("\n")[:30]
+    lines = ''.join(open("./day7_ex.txt").readlines()).split("\n")
+    #lines = ''.join(open("./day7_td.txt").readlines()).split("\n")[:30]
 else:
     lines = ''.join(open("./day7_data.txt").readlines()).split("\n")
 
@@ -14,6 +14,14 @@ for s0 in lines:
     data.append([n, t])
 
 def pt1(data):
+    #correct and reasonably quick
+    smash(data, '*+')
+
+def pt2(data):
+    #correct and appallingly slow
+    smash(data, '*+||')
+
+def smash(data, ops):
     found = []
     #data = [[292, [11, 6, 16, 20]]]
     #data = [[4558, [4, 2, 894, 9, 4, 1, 851, 4, 4, 55]]]
@@ -23,22 +31,7 @@ def pt1(data):
     lens = [len(t) for n, t in data]
 
     ml = max(lens)
-    seq_cache = [0] * (ml+1)
-    for idx, (n,t) in enumerate(data):
-        if seq_cache[len(t)] != 0:
-            continue
-        print("warm up: %d" % len(t))
-        base_perms = []
-        all_perms = set()
-        for i in range(len(t)+1):
-            a = ['*']*(len(t)-i) + ['+']*i
-            base_perms.append(a)
-        for bp in base_perms:
-            expand = list(set(itertools.permutations(bp, len(t))))
-            all_perms= all_perms.union(expand)
-
-        seq_cache[len(t)] = all_perms
-    
+  
     for n, t in data:
         print(lc)
         if sum(t) == n:
@@ -46,12 +39,11 @@ def pt1(data):
         elif math.prod(t) == n:
             found.append(n)
         else:
-            sops = seq_cache[len(t)]
-            print(len(sops))
+            sops = itertools.product(ops, repeat=len(t)-1)
             itcount = 0
             for ol in sops:
                 itcount += 1
-                if itcount % 1000 == 0:
+                if itcount % 100000 == 0:
                     print(itcount)
                 ol = list(ol)
                 ol.append('')
@@ -72,6 +64,8 @@ def pt1(data):
                         res = buf[0]+buf[2]
                     elif buf[1] == '*':
                         res = buf[0]*buf[2]
+                    elif buf[1] == '|':
+                        res = int(str(buf[0])+str(buf[2]))
                     buf = [res]
                 if res == n:
                     found.append(n)
@@ -82,4 +76,5 @@ def pt1(data):
     print(found)
     print(sum(found))
 
-pt1(data)
+#pt1(data)
+pt2(data)
