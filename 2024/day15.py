@@ -151,7 +151,6 @@ def find_connected_boxes(look, maze, pos, dir):
             continue
         if maze[u[0]][u[1]] in bp:
             boxes.add(u)
-        #for new_position in [(0, -1), (0, 1), (-1, 0), (1, 0)]: # Adjacent squares
         search = [dir]
         if maze[u[0]][u[1]] == '[':
             search.append((0,1))
@@ -171,6 +170,7 @@ def find_connected_boxes(look, maze, pos, dir):
 #maze, moves, pos = read_data('day15_ex0.txt')
 #maze, moves, pos = read_data('day15_ex1.txt')
 #maze, moves, pos = read_data('day15_ex.txt')
+#maze, moves, pos = read_data('day15_data.txt')
 
 # part2
 #maze, moves, pos = read_data('day15_ex_p2.txt')
