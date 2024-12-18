@@ -1,10 +1,13 @@
 
-from collections import deque
+from collections import deque, defaultdict
 
 up, right, down, left = (-1,0), (0,1), (1,0), (0,-1)
-dirs = (up, right, down, left)
+#dirs = (up, right, down, left)
+dir_names = {up: "up", right: "right", down: "down", left: "left"}
+dirs = {"up": up, "right": right, "down": down, "left": left}
 turn_right = {up: right, right: down, down: left, left: up}
 turn_left = {up: left, right: up, down: right, left: down}
+opps = {up: down, left: right, down: up, right: left}
 
 def read_data(fn):
     maze = []
@@ -38,41 +41,83 @@ def new_path_entry(direction, path, score):
 
 def search(maze, start_pos, end_pos):
     #queue = deque([start_pos, end_pos])
-    queue = deque([start_pos])
-    paths = set()
+    #paths = defaultdict(int)
+    paths = []
     visited = set()
-    fwd_path = [start_pos]
+    start_dir = right
+
+    queue = deque([(start_pos, start_dir)])
+    fwd_path = [(start_pos, start_dir, dir_names[start_dir])]
+    #paths[tuple(fwd_path)] = 0
+    graph = defaultdict(int)
+    branch_paths = []
+    last_branch = None
 
     FWD, REV  = 0, 1
-    #direction = up
-
     while queue:
-        u = queue.pop()
-        if u in visited:
-            continue
-        visited.add(u)
-        if maze[u[0]][u[1]] == '#':
-            continue
-        search = [direction, turn_right[direction], turn_left[direction]]
-        for look in search: # TODO prefer going in the same direction?
+        u, d = queue.pop() #dfs
+        #u, d = queue.popleft() #bfs
+        #if u==(7,3) and d == right:
+        if u==(1,3):
+            stop = 1
+        # print(u)
+        dn = dir_names[d]
+        #if maze[u[0]][u[1]] == '#':
+        #    continue
+        visited.add((u,d))
+        fwd_path.append((u, d, dir_names[d]))
+        search = [d, turn_right[d], turn_left[d]]
+        next_cells = []
+        for look in search:
             nbor = (u[0] + look[0], u[1] + look[1])
-            if nbor[0] > (len(maze) - 1) or nbor[0] < 0 or nbor[1] > (len(maze[0]) -1) or nbor[1] < 0:
-                continue
             if maze[nbor[0]][nbor[1]] == '#':
                 continue
-            if nbor in visited: continue
-            fwd_path.append(nbor)
+            #if (nbor, d) in visited or (nbor, opps[d]) in visited:
+            if (nbor, opps[d]) in visited:
+                continue
+            next_cells.append((nbor, look))
+        if len(next_cells) > 1:
+            #print("branch!")
+            last_branch = u
+        if not next_cells and last_branch:
+            #print("popping branch!")
+            while True:
+                prev = fwd_path.pop()
+                if prev[0] == last_branch:
+                    fwd_path.append(prev)
+                    break
+        for nbor, look in next_cells:            
+            score = 1
+            if look != d:
+                #print("turn!")
+                score += 1000
+            graph[(u, nbor)] += score
             if (nbor == end_pos):
-                paths.add(tuple(fwd_path))
-                print("found it!")
-                print(len(fwd_path))
-                break
-            queue.append(nbor)
-        print_grid(maze, fwd_path)
+                # print("reached end!")
+                # print(len(fwd_path))
+                paths.append(fwd_path)
+                while True:
+                    prev = fwd_path.pop()
+                    if prev[0] == last_branch:
+                        fwd_path.append(prev)
+                        #queue.append((prev[0], prev[1]))
+                        queue.append((prev[0], turn_right[prev[1]]))
+                        queue.append((prev[0], turn_left[prev[1]]))
+                        break
+            else:
+                queue.append((nbor, look))
+        tmp_path = [x[0] for x in fwd_path]
+        print_grid(maze, tmp_path)
+        import time; time.sleep(0.1)
+    for idx, path in enumerate(paths):
+        print("Found path %d:" % idx)
+        tmp_path = [x[0] for x in fwd_path]
+        print_grid(maze, tmp_path)
     return paths
 
 
 maze, start_pos, end_pos = read_data('day16_ex.txt')
 print_grid(maze, [])
 shortest = search(maze, start_pos, end_pos)
+print(shortest)
 

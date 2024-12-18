@@ -29,7 +29,7 @@ def read_data(fn):
 
 machines = read_data('day13_ex.txt') # pt1 480 # pt2 
 #machines = read_data('day13_ex2.txt') 
-machines = read_data('day13_data.txt') 
+#machines = read_data('day13_data.txt') 
 
 '''
 button_a = {'x':94, 'y':34}
@@ -50,6 +50,7 @@ def calc(machines):
         if presses_a == int(presses_a) and presses_b == int(presses_b):
             total += (presses_a*a_cost)
             total += (presses_b*b_cost)
+
     return total
 
 print('pt 1: %d' % calc(machines))
