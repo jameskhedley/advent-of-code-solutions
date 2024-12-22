@@ -5,11 +5,8 @@ MAXINT = sys.maxsize
 
 up, right, down, left = (-1,0), (0,1), (1,0), (0,-1)
 dir_names = {up: "up", right: "right", down: "down", left: "left"}
-dirs = {"up": up, "right": right, "down": down, "left": left}
 turn_right = {up: right, right: down, down: left, left: up}
 turn_left = {up: left, right: up, down: right, left: down}
-opps = {up: down, left: right, down: up, right: left}
-
 def read_data(fn):
     maze = []
     start_pos, end_pos = None, None
@@ -25,6 +22,18 @@ def read_data(fn):
             start_pos = (irow,icol)
     return maze, start_pos, end_pos
 
+def print_grid_part2(arr, path):
+    for y, line in enumerate(arr):
+        pl = ""
+        for x, cell in enumerate(line):
+            if (y,x) in path:
+                pl += " O"
+            else:
+                pl += " "+cell
+        print(pl + " " + str(y))
+    print(" 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4")
+    print("*******************************")
+
 def print_grid(arr, path):
     dpath = dict( [(x[0], x[1]) for x in path])
     sym = {right: '>', left: '<', up: '^', down: 'v'}
@@ -39,24 +48,24 @@ def print_grid(arr, path):
     print(" 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4")
     print("*******************************")
 
-def new_path_entry(direction, path, score):
-    return {'direction': direction, 'path': path, 'score': score}
+def pt1(maze, start_pos, end_pos):
+    scores, _ = search(maze, start_pos, end_pos)
+    end_scores = [score for (pos, dir), score in scores.items() if pos==end_pos]
+    print(min(end_scores))
+    return min(end_scores)
 
 def search(maze, start_pos, end_pos):
     start_dir = right
     queue = deque([(start_pos, 0, start_dir)])
     scores = defaultdict(lambda: MAXINT)
-    fwd_path = []
-    parents = defaultdict(list)
+    reached_from = {}
+    fwd_path = [] # only for drawing a path visualisation
     scores[(start_pos, start_dir)] = 0
 
-    FWD, REV  = 0, 1
     while queue:
-        #u, uscore, d = queue.pop() #dfs
+        #u, uscore, d = queue.pop() #dfs - not suitable for this problem
         u, uscore, d = queue.popleft() #bfs
         dn = dir_names[d]
-        if u == (7,1):
-            stop = 1
         fwd_path.append((u, d, dir_names[d]))
         if maze[u[0]][u[1]] == '#':
             continue
@@ -75,23 +84,62 @@ def search(maze, start_pos, end_pos):
             if look != d:
                 score += 1000
             queue.append((nbor, uscore + score, look)) # key point - keep temporary score in the queue
+            reached_from[(nbor, look)] = (u, d, uscore)
         if viz:
             print_grid(maze, fwd_path)
             import time; time.sleep(0.1)
     print_grid(maze, fwd_path)
-    end_scores = [score for (pos, dir), score in scores.items() if pos==end_pos]
-    return(min(end_scores))
+    return scores, reached_from
+    
+def pt2(maze, start_pos, end_pos):
+    scores, reached_from = search(maze, start_pos, end_pos)
+    end_scores = [(score, dir) for (pos, dir), score in scores.items() if pos==end_pos]
+    end_scores.sort(key=lambda x: x[0])
+    found = check_route_distance(start_pos, end_pos, min(end_scores)[0], min(end_scores)[1], reached_from, scores)
+    print_grid_part2(maze, found)
+    print(min(end_scores))
+    print("part 2: %d" % (len(found)+1))
+
+def check_route_distance(start_pos, end_pos, end_score, end_dir, reached_from, scores):
+    tpos = end_pos
+    visited = set()
+    found = set([end_pos])
+    queue = deque([(end_pos, end_dir)])
+    while queue:
+        tpos = queue.popleft()
+        if tpos in visited:
+            continue
+        score = scores[tpos]
+        if tpos[0] == start_pos:
+            continue
+
+        from_cells = [(from_cell, tdir, ddir, score) 
+            for (dest_cell, ddir), (from_cell, tdir, score) in reached_from.items() 
+            if dest_cell == tpos[0] ] #this is probably quite slow
+        for (nxpos, nxdir, _, _) in from_cells:
+            if (nxpos, nxdir) in visited:
+                continue
+            #check all direction scores for the cell, can basically tell if it was traversed by score delta
+            for dir in (up, right, down, left):
+                dscore = scores[nxpos, dir]
+                if score-dscore in (1,1001):
+                    queue.append((nxpos, dir))
+
+        visited.add(tpos)
+        found.add(tpos[0])
+
+    print(len(found))
+    return found
 
 #viz=True
 viz=False
-
-#maze, start_pos, end_pos = read_data('day16_ex.txt') #7036
-#maze, start_pos, end_pos = read_data('day16_ex1.txt') #11048
+#maze, start_pos, end_pos = read_data('day16_ex.txt') #p1 7036 p2 45
+#maze, start_pos, end_pos = read_data('day16_ex1.txt') #11048 p2 64
 #maze, start_pos, end_pos = read_data('day16_ex2.txt') #21148
 #maze, start_pos, end_pos = read_data('day16_ex3.txt') #21110
 #maze, start_pos, end_pos = read_data('day16_ex4.txt') #4013
-#maze, start_pos, end_pos = read_data('day16_ex5.txt') #
 maze, start_pos, end_pos = read_data('day16_data.txt')
-shortest = search(maze, start_pos, end_pos)
-print(shortest)
+#print("part1: %d" % pt1(maze, start_pos, end_pos))
+
+pt2(maze, start_pos, end_pos)
 
