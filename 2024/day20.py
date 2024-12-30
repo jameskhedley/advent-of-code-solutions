@@ -1,4 +1,5 @@
 from collections import deque, defaultdict
+from functools import cache
 
 up, right, down, left = (-1,0), (0,1), (1,0), (0,-1)
 dirs = (up, right, down, left)
@@ -89,8 +90,6 @@ def calc_saving_for_cheat(maze, cheat, scores, end_pos):
         h = 1
     if maze[cheat[0]+up[0]][cheat[1]+up[1]] in open_chars and maze[cheat[0]+down[0]][cheat[1]+down[1]] in open_chars:
         v = 1
-    if h and v:
-        raise RuntimeError("wat do")
     if h:
         left = scores[(cheat[0], cheat[1]-1)]
         right = scores[(cheat[0], cheat[1]+1)]
@@ -100,6 +99,30 @@ def calc_saving_for_cheat(maze, cheat, scores, end_pos):
         down = left = scores[(cheat[0]+1, cheat[1])]
         save = abs( up - down) - 2
     return save
+
+@cache
+def manhattan(x,y):
+    return abs(x[0]-y[0]) + abs(x[1]-y[1])
+
+def find_20s_cheats(maze, scores, thresh):
+    check = {}
+    countup = defaultdict(int)
+    # I think we just check every score against every other score if the manhattan distance is short enough
+    for i, row in enumerate(maze):
+        print("%d/%d" % (i, len(maze)))
+        for j, cell in enumerate(row):
+            if maze[i][j] == '#':
+                continue
+            #print("%d, %d" % (i,j))
+            for cell, score in scores.items():
+                md = manhattan(cell, (i,j))
+                if md <= 20:
+                    if score > scores[(i,j)]:
+                        diff = abs(scores[(i,j)] - score) - md 
+                        if diff >= thresh:
+                            check[((i,j), cell)] = diff
+                            countup[diff] += 1
+    return countup
 
 #viz=True
 viz=False
@@ -123,7 +146,7 @@ pcheats = find_potential_cheats(maze, path, dimx-1)
 if show_grid:
     print_grid(maze, dimx, dimy, pcheats)
 
-# final answer
+# part 1 final answer
 results = defaultdict(int)
 final = 0
 for count, cheat in enumerate(pcheats):
@@ -131,5 +154,15 @@ for count, cheat in enumerate(pcheats):
     if saving >= 100:
         results[saving] += 1
         final+=1
-from pprint import pprint; pprint(results)
-print(final)
+#from pprint import pprint; pprint(results)
+print("part 1: %d" % final)
+final = 0
+example_thresh = 50
+full_thresh = 100
+savings = find_20s_cheats(maze, scores, full_thresh)
+#savings = find_20s_cheats(maze, scores, example_thresh)
+for diff, inc in savings.items():
+    #if diff >= example_thresh:
+    if diff >= full_thresh:
+        final+=inc
+print("part 1: %d" % final)
