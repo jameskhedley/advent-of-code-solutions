@@ -32,8 +32,7 @@ def part2_slooow(data): # fine on example but too slow on input
     perfects = set()
     longest = 0   
     nvert = len(graph.keys())
-    #for start_pos in graph.keys():
-    for start_pos in ['de']:
+    for start_pos in graph.keys():
         q = deque([(start_pos, [start_pos], defaultdict(set))])
         pprint(graph)
         while q:
@@ -43,8 +42,6 @@ def part2_slooow(data): # fine on example but too slow on input
             if len(cliq) > longest:
                 print(len(cliq))
             longest = max(longest, len(cliq))
-            if cliq == ['de', 'co', 'ta', 'ka', 'de','ta','co', 'ka', 'de']:
-                stop = 1
             # perfect graph? is every computer connected to every other in the subnet
             lc = len(set(cliq))
             if lc > 3:
@@ -70,7 +67,7 @@ def part2_cycles(data): # also too slow, tries to find loops and then checks the
     nvert = len(graph.keys())
     cycles = set()
     perfects = set()
-    #for ll in range(4,6):
+    #for ll in range(4,??):
     for ll in [9]:
         print(ll)
         lc = find_cycles(graph, ll)
@@ -91,19 +88,12 @@ def part2_cycles(data): # also too slow, tries to find loops and then checks the
 
 def find_cycles(graph, length):
     paths = set()
-    count = 0
     for start_pos in graph.keys():
-    #for start_pos in ['yn']:
         q = deque([(start_pos, [start_pos], set())])
         while q:
             u, cliq, vizedge = q.popleft()
             if len(cliq) > length:
                 continue
-            count += 1
-            if count %10000 == 0: print(count)
-            if cliq == ['co', 'de', 'ka', 'ta', 'co']:
-            #if cliq == ['co']:
-                stop = 1
             if len(cliq) == length:
                 if cliq[0] == cliq[length-1]: #cycle detection
                     paths.add(frozenset(cliq))
@@ -115,8 +105,6 @@ def find_cycles(graph, length):
                 if len(cliq) > 2 and nbor == cliq[-2]: # don't immediately reverse course
                     continue
                 ncliq = list(cliq)+[nbor]
-                if ncliq == ['co', 'de']:
-                    stop =1
                 sg = {}
                 for node in ncliq:
                     sg[node]=[x for x in graph[node] if x in ncliq]
@@ -124,9 +112,8 @@ def find_cycles(graph, length):
                     continue
                 nvz = set(vizedge)
                 nvz.add((nbor,u))
-                #nvz.add((u,nbor))
+                #nvz.add((u,nbor)) # why does this make it slower??
                 q.append((nbor, ncliq, nvz))
-    print(count)
     return paths
 
 def part2(data):
