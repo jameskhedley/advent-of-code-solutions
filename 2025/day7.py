@@ -46,38 +46,6 @@ def part2_doctor_strange(maze):
         timelines.add(tuple(visited))
     return len(timelines)
 
-def part2_beams(maze):
-    #ugh, doesn't work, overcounts
-    ypos = 0
-    spos = maze[0].index('S')
-    lxpos = set([spos])
-    visited = set()
-    beam1 = ((ypos, spos),)
-    beams = set([beam1])
-    while ypos < len(maze)-1:
-        nlxpos = copy(lxpos)
-        for xpos in lxpos:
-            visited.add((ypos,xpos))
-            if maze[ypos+1][xpos] == '^':
-                nlxpos.add(xpos-1)
-                nlxpos.add(xpos+1)
-                nlxpos.remove(xpos)
-        lxpos = nlxpos
-        ypos += 1
-        newbeams = set()
-        while beams:
-            oldbeam = beams.pop()
-            for xpos in lxpos:
-                if abs(xpos - oldbeam[-1][1]) > 1:
-                    continue
-                temp = list(oldbeam)
-                temp.append((ypos,xpos))
-                newbeams.add(tuple(temp))
-        beams = newbeams
-        lxpos = nlxpos
-    #print_grid(maze, visited)
-    return len(beams)
-
 def part1(maze):
     ypos = 0
     spos = maze[0].index('S')
@@ -101,23 +69,21 @@ def part1(maze):
     print_grid(maze, visited)
     return splits
 
-def part2(maze):
-    ypos = 0
-    spos = maze[0].index('S')
-    lxpos = [spos]
-    visited = set()
+def part2(maze): #this actually solves both parts!
+    splits, ypos, spos = 0, 0, maze[0].index('S')
+    lxpos = defaultdict(int)
+    lxpos[spos] = 1   
     while ypos < len(maze)-1:
-        print(ypos)
-        for xpos in lxpos:
-            visited.add((ypos,xpos))
+        nlxpos = copy(lxpos)
+        for (xpos,xcount) in lxpos.items():
             if maze[ypos+1][xpos] == '^':
-                lxpos.append(xpos-1)
-                lxpos.append(xpos+1)
-                lxpos = [p for p in lxpos if p != xpos] #xpos is on a splitter so can't be visited in next row
+                splits += 1
+                nlxpos[xpos+1]+=xcount
+                nlxpos[xpos-1]+=xcount
+                nlxpos[xpos] = 0 #xpos is on a splitter so can't be visited in next row
         ypos += 1 
-        #print(lxpos)
-    print_grid(maze, visited)
-    return sum([lxpos.count(x) for x in set(lxpos)])
+        lxpos = nlxpos
+    return sum(nlxpos.values()), splits
 
 #ex = True
 if ex:
@@ -126,6 +92,7 @@ if ex:
 else:
     maze = read_data("./day7.txt")
 
-#print("part 1 answer: %d " % part1(maze))
-#print("part 2 answer: %d " % part2_doctor_strange(maze))
-print("part 2 answer: %d " % part2(maze))
+print("part 1 answer: %d, part 2 answer %d " % part2(maze))
+#import cProfile
+#cProfile.run('part2(maze)')
+
