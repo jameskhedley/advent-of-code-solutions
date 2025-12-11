@@ -92,7 +92,8 @@ if ex:
 else:
     maze = read_data("./day7.txt")
 
-print("part 1 answer: %d, part 2 answer %d " % part2(maze))
+#print("part 1 answer: %d, part 2 answer %d " % part2(maze))
+part1(maze)
 #import cProfile
 #cProfile.run('part2(maze)')
 

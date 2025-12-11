@@ -1,20 +1,29 @@
-from collections import deque, defaultdict
+#part 1 quite slow but only 30 seconds
 
-line = "[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1)"
+from collections import deque
+ex = False
 
-# goal = [1 if char=='#' else 0 for char in list(line[:line.index('(')-1].strip('[').strip(']'))] # use for scoring?
-goal = tuple([True if char=='#' else False for char in list(line[:line.index('(')-1].strip('[').strip(']'))])
-#moves = [list(x.strip('(').strip(')').strip(',')) for x in line[line.index('('):].split(' ')]
-moves = [[int(x) for x in list(x.strip('(').strip(')')) if x!=','] for x in line[line.index('('):].split(' ')]
-#print(moves)
-
-print(goal)
-print(moves)
-
-init_state = tuple([False]*len(goal))
-
-def score(x,y):
-    return sum([abs(x[0]-y[0]), abs(x[1]-y[1]), abs(x[2]-y[2])])
+def p1solve(goal, moves, init_state):
+    visited = set()
+    queue = deque([[init_state,tuple()]])
+    move, paths, done = None, [], False
+    while queue:
+        state, path = queue.popleft() #bfs pops from left
+        #state = queue.pop() #dfs pops from right
+        for move in moves:
+            if tuple(move) in path:
+                continue # I sink is pointless to do same button twice in any sequence
+            new_path = path + (tuple(move),)
+            if paths and len(paths[0]) < len(new_path):
+                done = True # we'll find the shortest paths first so can just bail once we start finding longer ones
+                break
+            visited.add(new_path)
+            new_state = mutate(state, move)
+            queue.append([new_state, new_path])
+            if new_state == goal:
+                paths.append(new_path)
+        if done: break
+    return len(paths[0])
 
 def mutate(state, move):
     new_state = list(state)
@@ -25,47 +34,40 @@ def mutate(state, move):
             new_state[light] = True
     return tuple(new_state)
 
-def solve(goal, moves):
-    #bfs or dfs?
-    visited = set()
-    queue = deque([[init_state,[]]])
-    move = None
-    paths = []
-    while queue:
-        state, path = queue.popleft() #bfs pops from left
-        #state = queue.pop() #dfs pops from right
-        for move in moves:
-            new_path = path + [move]
-            print("next_move: %s" % str(move))
-            new_state = mutate(state, move)
-            if new_state in visited:
-                continue
-            queue.append([new_state, new_path])
-            visited.add(state)
-            if new_state == goal:
-                print("found!")
-                paths.append(new_path)
-        
-        print("state: %s" % str(state))
-    return paths
+#ex=True
+def part1():
+    ans = 0
+    if ex:
+        h0 = open('day10_ex.txt')
+    else:
+        h0 = open('day10.txt')
+    for idx, line in enumerate(h0.readlines()):
+        print(idx)
+        goal = tuple([True if char=='#' else False for char in list(line[:line.index('(')-1].strip('[').strip(']'))])
+        line = line.split(']')[1].split('{')[0][1:-1]
+        moves = [[int(x) for x in list(x.strip('(').strip(')')) if x!=','] for x in line[line.index('('):].split(' ')]
+        print(moves)
+        init_state = tuple([False]*len(goal))
+        ans += p1solve(goal, moves, init_state)
+    print("part 1 answer: %s" % ans)
 
-found_paths = solve(goal, moves)
-print(found_paths)
+part1()
 
+def score(x,y):
+    return sum([abs(x[0]-y[0]), abs(x[1]-y[1]), abs(x[2]-y[2])])
 
-# print("=================================")    
-# state=init_state
-# print(state)
-# for move in moves:
-#     print(move)
-#     print(mutate(init_state, move))
+def render(lights):
+    s0 = '['+''.join(['#' if x else '.' for x in lights])+']'
+    return s0
 
+if 0:
+    path0 = [[0, 3, 4]]
+    state = mutate([True, False, False, False, False, False], path0[0])
+    print(render(state))
 
-
-# zero_one_zero = [False, True, False]
-# zero = [False]*3
-
-# zero_one_one = [False, True, True]
-
-# print(score(zero, zero_one_zero))
-# print(score(zero, zero_one_one))
+if 0:
+    path0 = [[1, 3], [2, 3]]
+    state = mutate(init_state, path0[0])
+    print(render(state))
+    state = mutate(state, path0[1])
+    print(render(state))
