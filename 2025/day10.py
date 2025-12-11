@@ -1,5 +1,4 @@
-#part 1 quite slow but only 30 seconds
-
+#part 1 quite slow but only 30 seconds, could use cprofile to find hotspots
 from collections import deque
 ex = False
 
@@ -46,9 +45,10 @@ def part1():
         goal = tuple([True if char=='#' else False for char in list(line[:line.index('(')-1].strip('[').strip(']'))])
         line = line.split(']')[1].split('{')[0][1:-1]
         moves = [[int(x) for x in list(x.strip('(').strip(')')) if x!=','] for x in line[line.index('('):].split(' ')]
-        print(moves)
         init_state = tuple([False]*len(goal))
-        ans += p1solve(goal, moves, init_state)
+        res = p1solve(goal, moves, init_state)
+        print("shortest seq: %d, moveset: %s" % (res, str(moves)))
+        ans+=res
     print("part 1 answer: %s" % ans)
 
 part1()
