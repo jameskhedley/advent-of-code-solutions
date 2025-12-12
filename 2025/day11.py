@@ -1,4 +1,6 @@
-from collections import deque
+from collections import deque, defaultdict
+from copy import copy
+import math
 ex = False
 
 def read_data(part):
@@ -20,7 +22,7 @@ def solve_old(map, start, end): # this remembers whole paths, not just counts. f
     queue = deque([[start,(start,)]])
     paths = set()
     while queue:
-        pos, path = queue.popleft()
+        pos, path = queue.popleft() # todo should be pop right for DFS?
         for move in map[pos]:
             new_path = path + (move,)
             if move == end:
@@ -31,22 +33,19 @@ def solve_old(map, start, end): # this remembers whole paths, not just counts. f
         print(pp)
     return len(paths)
 
-def solve_fast(map, start, end): # this time only remember counts between start and end
-    queue = deque([{'pos': start, 'plen': 0}])
-    count=0
-    cache = {}
-    while queue:
-        count+=1
-        if count % 100000==0:
-            print(count)
-        pos, plen = queue.popleft().values()
-        #if (start, pos) in cache:
-        for move in map[pos]:
-            if move == end:
-                #return cache[(start,pos)]+1
-                return plen+1
-            #if (start, move) in cache:
-            queue.append({'pos': move, 'plen': plen+1})
+def dist(map, start, end, cache={}):
+    if start == end:
+        return 0
+    if start in cache:
+        return cache[start]
+    if start == 'out':
+        return math.inf
+    lengths = []
+    for move in map[start]:
+        lengths.append(dist(map, move, end, cache))
+    cache[start] = min(lengths)+1
+    #print("called with start: %s, end %s, returned length %d" % (start, end, cache[start]))
+    return cache[start]
 
 ex=True
 pts = [2]
@@ -55,12 +54,38 @@ if 1 in pts:
     print("part 1 answer: %d" % solve_old(data, "you", "out"))
 if 2 in pts:
     data = read_data(2)
-    if 0:
-        print(solve_fast(data, "svr", "out"))
     if 1:
-        a0 = solve_fast(data, "svr", "fft")
-        a1 = solve_fast(data, "svr", "dac")
-        a2 = solve_fast(data, "fft", "out")
-        a3 = solve_fast(data, "dac", "out")
-        print(a0*a1*a2*a3)
-    #print("part 2 answer: %d" % solve(data, "svr", set(["fft","dac"])))
+        c0 = {}
+        ans0 = dist(data, "svr", "out", c0)
+        #print(ans0)
+        keys0 = set([y for x,y in c0.items() if y<math.inf])
+        routes0 = sorted([(x,y) for x,y in c0.items() if y<math.inf], key=lambda xx: xx[1])
+        print(max([[y for x,y in routes0].count(k) for k in keys0]))
+        pass
+    if 0:
+        c0 = {}
+        ans0 = dist(data, "svr", "fft", c0)
+        #print(ans0)
+        keys0 = set([y for x,y in c0.items() if y<math.inf])
+        routes0 = sorted([(x,y) for x,y in c0.items() if y<math.inf], key=lambda xx: xx[1])
+        print(max([[y for x,y in routes0].count(k) for k in keys0]))
+        #c1 = {}
+        #ans1 = dist(data, "svr", "dac", c1)
+        #print(ans1)
+        c2 = {}
+        ans2 = dist(data, "fft", "dac", c2)
+        #print(ans2)
+        keys2 = set([y for x,y in c2.items() if y<math.inf])
+        routes2 = sorted([(x,y) for x,y in c2.items() if y<math.inf], key=lambda xx: xx[1])
+        print(max([[y for x,y in routes2].count(k) for k in keys2]))
+        #c3 = {}
+        #ans3 = dist(data, "dac", "fft", c3) #INFINITY!!
+        #print(ans3)
+        c4 = {}
+        ans4 = dist(data, "dac", "out", c4)
+        #print(ans4)
+        keys4 = set([y for x,y in c4.items() if y<math.inf])
+        routes4 = sorted([(x,y) for x,y in c4.items() if y<math.inf], key=lambda xx: xx[1])
+        print(max([[y for x,y in routes4].count(k) for k in keys4]))
+        pass
+    #print("part 2 answer: %d" % )
