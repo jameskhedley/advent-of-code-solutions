@@ -33,19 +33,28 @@ def solve_old(map, start, end): # this remembers whole paths, not just counts. f
         print(pp)
     return len(paths)
 
-def dist(map, start, end, cache={}):
+def dist(map, start, end, path, cache={}):
+    if not path: path = (start,)
+    paths = set()
+    if start == "eee":
+        pass
     if start == end:
-        return 0
+        if "dac" in path and "fft" in path:
+            paths.add(path)
+        return 0, paths
     if start in cache:
-        return cache[start]
+        return cache[start], paths
     if start == 'out':
-        return math.inf
+        return math.inf, paths
     lengths = []
     for move in map[start]:
-        lengths.append(dist(map, move, end, cache))
+        new_path = path + (move,)
+        length, new_paths = dist(map, move, end, new_path, cache)
+        paths = paths.union(new_paths)
+        lengths.append(length)
     cache[start] = min(lengths)+1
     #print("called with start: %s, end %s, returned length %d" % (start, end, cache[start]))
-    return cache[start]
+    return cache[start], paths
 
 ex=True
 pts = [2]
@@ -56,36 +65,27 @@ if 2 in pts:
     data = read_data(2)
     if 1:
         c0 = {}
-        ans0 = dist(data, "svr", "out", c0)
-        #print(ans0)
-        keys0 = set([y for x,y in c0.items() if y<math.inf])
-        routes0 = sorted([(x,y) for x,y in c0.items() if y<math.inf], key=lambda xx: xx[1])
-        print(max([[y for x,y in routes0].count(k) for k in keys0]))
-        pass
+        ans0, paths = dist(data, "svr", "out", None, c0)
+        print(len(paths))
     if 0:
         c0 = {}
-        ans0 = dist(data, "svr", "fft", c0)
-        #print(ans0)
-        keys0 = set([y for x,y in c0.items() if y<math.inf])
-        routes0 = sorted([(x,y) for x,y in c0.items() if y<math.inf], key=lambda xx: xx[1])
-        print(max([[y for x,y in routes0].count(k) for k in keys0]))
-        #c1 = {}
-        #ans1 = dist(data, "svr", "dac", c1)
-        #print(ans1)
+        ans0, paths = dist(data, "svr", "fft", c0)
+        print(len(paths))
+
+        c1 = {}
+        ans1, paths = dist(data, "svr", "dac", c1)
+        print(len(paths))
+
         c2 = {}
-        ans2 = dist(data, "fft", "dac", c2)
-        #print(ans2)
-        keys2 = set([y for x,y in c2.items() if y<math.inf])
-        routes2 = sorted([(x,y) for x,y in c2.items() if y<math.inf], key=lambda xx: xx[1])
-        print(max([[y for x,y in routes2].count(k) for k in keys2]))
-        #c3 = {}
-        #ans3 = dist(data, "dac", "fft", c3) #INFINITY!!
-        #print(ans3)
+        ans2, paths = dist(data, "fft", "dac", c2)
+        print(len(paths))
+
+        c3 = {}
+        ans3, paths = dist(data, "dac", "fft", c3) #INFINITY!!
+        print(len(paths))
+        
         c4 = {}
-        ans4 = dist(data, "dac", "out", c4)
-        #print(ans4)
-        keys4 = set([y for x,y in c4.items() if y<math.inf])
-        routes4 = sorted([(x,y) for x,y in c4.items() if y<math.inf], key=lambda xx: xx[1])
-        print(max([[y for x,y in routes4].count(k) for k in keys4]))
+        ans4, paths = dist(data, "dac", "out", c4)
+        print(len(paths))
         pass
     #print("part 2 answer: %d" % )
