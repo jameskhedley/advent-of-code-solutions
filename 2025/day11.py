@@ -32,7 +32,7 @@ def solve_old(map, start, end): # this remembers whole paths, not just counts. f
     #    print(pp)
     return len(paths)
 
-def dist(map, start, end, cache={}, visited=set()):
+def dist(map, start, end, cache={}, visited=set()): # much faster due to cache and visited set
     if start in visited:
         return 0
     if start == end:
