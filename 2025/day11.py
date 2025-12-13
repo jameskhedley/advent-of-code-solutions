@@ -1,6 +1,5 @@
-from collections import deque, defaultdict
+from collections import deque
 from copy import copy
-import math
 ex = False
 
 def read_data(part):
@@ -29,8 +28,8 @@ def solve_old(map, start, end): # this remembers whole paths, not just counts. f
                 paths.add(new_path)
                 continue
             queue.append([move, new_path])
-    for pp in paths:
-        print(pp)
+    #for pp in paths:
+    #    print(pp)
     return len(paths)
 
 def dist(map, start, end, cache={}, visited=set()):
@@ -50,39 +49,25 @@ def dist(map, start, end, cache={}, visited=set()):
     cache[start] = paths
     return paths
 
-ex=True
-pts = [2]
+#ex=True
+pts = [1,2]
 if 1 in pts:
     data = read_data(1)
     print("part 1 answer: %d" % solve_old(data, "you", "out"))
 if 2 in pts:
     data = read_data(2)
-    if 1:
-        c0 = {}
-        ans0 = dist(data, "svr", "out", c0)
-        print(ans0)
-    if 0:
-        c0 = {}
-        svr_fft = dist(data, "svr", "fft", c0)
-        print(svr_fft)
-
-        c1 = {}
-        svr_dac = dist(data, "svr", "dac", c1)
-        print(svr_dac)
-
-        c2 = {}
-        fft_dac = dist(data, "fft", "dac", c2)
-        print(fft_dac)
-
-        c3 = {}
-        dac_fft = dist(data, "dac", "fft", c3) #INFINITY!!
-        print(dac_fft)
-        
-        c4 = {}
-        dac_out = dist(data, "dac", "out", c4)
-        print(dac_out)
-        pass
+    if ex:
+        ans0 = dist(data, "svr", "fft", {})
+        ans1 = dist(data, "fft", "dac", {})
+        ans2 = dist(data, "dac", "out", {})
+        ans = ans0*ans1*ans2
+        print("part 2 answer: %d" % ans)
+    else:
+        svr_fft = dist(data, "svr", "fft", {})
+        fft_dac = dist(data, "fft", "dac", {})
+        #dac_fft = dist(data, "dac", "fft") #INFINITY??
+        dac_out = dist(data, "dac", "out", {})
         ans = svr_fft*fft_dac*dac_out
-        print(ans)
+        print("part 2 answer: %d" % ans)
         
-    #print("part 2 answer: %d" % )
+    
