@@ -42,13 +42,13 @@ def dist(map, start, end, cache={}, visited=set()):
         return 0
     if start in cache:
         return cache[start]
-    length = 0
+    paths = 0
     visited.add(start)
     for move in map[start]:
-        length += dist(map, move, end, cache, visited)
+        paths += dist(map, move, end, cache, visited)
     visited.remove(start)
-    cache[start] = length
-    return length
+    cache[start] = paths
+    return paths
 
 ex=True
 pts = [2]
