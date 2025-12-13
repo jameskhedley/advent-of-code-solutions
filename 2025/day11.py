@@ -33,28 +33,22 @@ def solve_old(map, start, end): # this remembers whole paths, not just counts. f
         print(pp)
     return len(paths)
 
-def dist(map, start, end, path, cache={}):
-    if not path: path = (start,)
-    paths = set()
-    if start == "eee":
-        pass
+def dist(map, start, end, cache={}, visited=set()):
+    if start in visited:
+        return 0
     if start == end:
-        if "dac" in path and "fft" in path:
-            paths.add(path)
-        return 0, paths
-    if start in cache:
-        return cache[start], paths
+        return 1
     if start == 'out':
-        return math.inf, paths
-    lengths = []
+        return 0
+    if start in cache:
+        return cache[start]
+    length = 0
+    visited.add(start)
     for move in map[start]:
-        new_path = path + (move,)
-        length, new_paths = dist(map, move, end, new_path, cache)
-        paths = paths.union(new_paths)
-        lengths.append(length)
-    cache[start] = min(lengths)+1
-    #print("called with start: %s, end %s, returned length %d" % (start, end, cache[start]))
-    return cache[start], paths
+        length += dist(map, move, end, cache, visited)
+    visited.remove(start)
+    cache[start] = length
+    return length
 
 ex=True
 pts = [2]
@@ -65,27 +59,30 @@ if 2 in pts:
     data = read_data(2)
     if 1:
         c0 = {}
-        ans0, paths = dist(data, "svr", "out", None, c0)
-        print(len(paths))
+        ans0 = dist(data, "svr", "out", c0)
+        print(ans0)
     if 0:
         c0 = {}
-        ans0, paths = dist(data, "svr", "fft", c0)
-        print(len(paths))
+        svr_fft = dist(data, "svr", "fft", c0)
+        print(svr_fft)
 
         c1 = {}
-        ans1, paths = dist(data, "svr", "dac", c1)
-        print(len(paths))
+        svr_dac = dist(data, "svr", "dac", c1)
+        print(svr_dac)
 
         c2 = {}
-        ans2, paths = dist(data, "fft", "dac", c2)
-        print(len(paths))
+        fft_dac = dist(data, "fft", "dac", c2)
+        print(fft_dac)
 
         c3 = {}
-        ans3, paths = dist(data, "dac", "fft", c3) #INFINITY!!
-        print(len(paths))
+        dac_fft = dist(data, "dac", "fft", c3) #INFINITY!!
+        print(dac_fft)
         
         c4 = {}
-        ans4, paths = dist(data, "dac", "out", c4)
-        print(len(paths))
+        dac_out = dist(data, "dac", "out", c4)
+        print(dac_out)
         pass
+        ans = svr_fft*fft_dac*dac_out
+        print(ans)
+        
     #print("part 2 answer: %d" % )
