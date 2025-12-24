@@ -122,6 +122,9 @@ def part2(data):
         horiz1 = (x1,y0),(x0,y0)
 
         #it's ok if the tip of each line in the rect touches the border!
+        #horiz0_min, horiz0_max = min(horiz0[0][0]+1,horiz0[1][0]), max(horiz0[0][0]+1,horiz0[1][0])
+        #horiz1_min, horiz1_max = min(horiz1[0][0]+1,horiz1[1][0]), max(horiz1[0][0]+1,horiz1[1][0])
+        #TODO - change this to use arithmetic on the ranges rather than generating a set
         candi_points_h0 = set([(x,horiz0[0][1]) for x in range(min(horiz0[0][0]+1,horiz0[1][0]), max(horiz0[0][0]+1,horiz0[1][0]))])
         candi_points_h1 = set([(x,horiz1[0][1]) for x in range(min(horiz1[0][0]+1,horiz1[1][0]), max(horiz1[0][0]+1,horiz1[1][0]))])
         for vl in v_lines:
@@ -178,7 +181,7 @@ def point_inside_border(point, border_points):
         inside = True
     return inside
 
-#ex=True
+ex=True
 data = read_data()
 #print("part1 answer: %d" % part1(data))
 print("part2 answer: %d" % part2(data))
